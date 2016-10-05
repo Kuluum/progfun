@@ -1,1 +1,11 @@
 .idea
+target/
+*/target/
+lib_managed/
+*/lib_managed/
+src_managed/
+*/src_managed/
+project/boot/
+*/project/boot/
+*/.history
+*/.cache
