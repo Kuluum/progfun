@@ -62,6 +62,49 @@ class BloxorzSuite extends FunSuite {
     }
   }
 
+  test("isLegal") {
+    new Level1 {
+      assert(Block(Pos(0, 0), Pos(1,1)).isLegal)
+      assert(!Block(Pos(0, 2), Pos(0, 3)).isLegal)
+    }
+  }
+
+  test("isStanding") {
+    new Level1 {
+      assert(Block(Pos(0, 0), Pos(0, 0)).isStanding)
+      assert(!Block(Pos(0, 0), Pos(0, 1)).isStanding)
+    }
+  }
+
+  test("neighboursWithHistory") {
+    new Level1 {
+      val neighboursTestSet = neighborsWithHistory(Block(Pos(1,1),Pos(1,1)), List(Left, Up)).toSet
+      val neighboursTrueSet = Set(
+        (Block(Pos(1,2),Pos(1,3)), List(Right,Left,Up)),
+        (Block(Pos(2,1),Pos(3,1)), List(Down,Left,Up))
+      )
+      assert(neighboursTestSet == neighboursTrueSet)
+    }
+  }
+
+  test("newNeighboursOnly") {
+    new Level1 {
+      val newNeighboursTest = newNeighborsOnly(
+        Set(
+          (Block(Pos(1,2),Pos(1,3)), List(Right,Left,Up)),
+          (Block(Pos(2,1),Pos(3,1)), List(Down,Left,Up))
+        ).toStream,
+
+        Set(Block(Pos(1,2),Pos(1,3)), Block(Pos(1,1),Pos(1,1)))
+      )
+
+      val trueNewNeighbours =   Set(
+        (Block(Pos(2,1),Pos(3,1)), List(Down,Left,Up))
+      ).toStream
+
+      assert(newNeighboursTest == trueNewNeighbours)
+    }
+  }
 
 	test("optimal solution for level 1") {
     new Level1 {
