@@ -1,5 +1,7 @@
+import org.scalacheck.Gen.Parameters
+
 /**
-  Digital Circuits
+  * Digital Circuits
   */
 
 
@@ -12,6 +14,11 @@
 
   The time is simulated; it has nothing to with the actual time.
   */
+trait Parameters {
+  def InvertDelay: Int  = 1
+  def OrDelay: Int  = 3
+  def AndDelay: Int = 4
+}
 
 trait Simulation {
   type Action = () => Unit
@@ -51,11 +58,11 @@ trait Simulation {
   }
 }
 
-class Circut extends Simulation {
+trait Gates extends  Simulation {
 
-  val InvertDelay = 1
-  val OrDelay = 3
-  val AndDelay = 4
+  def InvertDelay: Int
+  def AndDelay: Int
+  def OrDelay: Int
 
   class Wire() {
     private var sigVal = false;
@@ -85,7 +92,7 @@ class Circut extends Simulation {
     def andAction(): Unit = {
       val in1Sig = a1.getSignal
       val in2Sig = a2.getSignal
-      afterDelay(AndDelay) { output setSignal  (in1Sig & in2Sig}
+      afterDelay(AndDelay) { output setSignal  (in1Sig & in2Sig)}
     }
     a1 addAction andAction
     a2 addAction andAction
@@ -100,6 +107,16 @@ class Circut extends Simulation {
     o1 addAction orAction
     o2 addAction orAction
   }
+
+  def orGateAlt(in1: Wire, in2: Wire, output: Wire): Unit = {
+    val notIn1, notIn2, notOut = new Wire
+    inverter(in1, notIn1); inverter(in2, notIn2)
+    andGate(notIn1, notIn2, notOut)
+    inverter(notOut, output)
+  }
+}
+
+trait Circut extends Gates {
 
   def halfAdder(a: Wire, b: Wire, s: Wire, c: Wire): Unit = {
     val d = new Wire
@@ -118,4 +135,31 @@ class Circut extends Simulation {
     halfAdder(a, s, sum, c2)
     orGate(c1, c2, cout)
   }
+
+  def probe(name: String, wire: Wire): Unit = {
+    def probeAction(): Unit = {
+      println(s"$name $currentTime value = ${wire.getSignal}")
+    }
+    wire addAction probeAction
+  }
+
 }
+
+
+println("Welcome to the Simulation")
+object sim extends Circut with Parameters
+import sim._
+
+val in1, in2, sum, carry = new Wire
+
+halfAdder(in1, in2, sum, carry)
+probe("sum", sum)
+probe("carry", carry)
+
+in1 setSignal true
+run()
+in2 setSignal true
+run()
+
+in1 setSignal false
+run()
